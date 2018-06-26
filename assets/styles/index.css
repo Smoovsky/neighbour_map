@@ -1,0 +1,23 @@
+.transition-animation{
+  transition: all 0.5s;
+  position: relative;
+}
+
+.switch-icon-container{
+  width:50px;
+  height:50px;
+  position:absolute;
+  right:-50px;
+  z-index: 100;
+}
+
+.resultList{
+  overflow-y: scroll;
+  overflow-x: hidden;
+  /* overflow: hidden;
+  min-width: 0px; */
+}
+
+.listItem{
+  min-width:200px;
+}
