@@ -1,3 +1,8 @@
+label{
+    display: inline-block;
+    width: 60px;
+}
+
 .transition-animation{
   transition: all 0.5s;
   position: relative;
@@ -7,17 +12,86 @@
   width:50px;
   height:50px;
   position:absolute;
-  right:-50px;
+  top:35px;
+  right:-60px;
   z-index: 100;
+  color:white;
+  padding: 5px 5px;
+  background-color: #424242;
+  border-radius: 0 10px 10px 0;
+}
+
+#bars{
+  transition: all 0.1s;
 }
 
 .resultList{
   overflow-y: scroll;
   overflow-x: hidden;
+  padding: 0 0;
+  background-color: white;
+  margin-right: 10px;
+  height: 85%;
+  list-style-type:none;
+  min-width:200px;
+  margin-top: 0;
+  margin-bottom: 0;
   /* overflow: hidden;
   min-width: 0px; */
 }
 
+.utils{
+  font-family: Arial, Helvetica, sans-serif;
+  color: white;
+  height: 15%;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;margin-right: 10px;
+  align-items: flex-start;
+  white-space: nowrap;
+}
+
 .listItem{
-  min-width:200px;
+  padding: 5px;
+  border-bottom: 1px solid rgba(0,0,1,0.5);
+  font-size: 20px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.listItem:hover{
+  cursor: pointer;
+}
+
+.listItemRemoveButton{
+  display: inline-block;
+  color:white;
+  background-color: red;
+  border-radius: 50%;
+  width: 20px;
+  height:20px;
+}
+
+.searchButton{
+  border: none;
+  color: white;
+  background-color: #424242;
+}
+
+.searchButton:hover{
+  cursor: pointer;
+}
+
+.listItemRemoveButtonContent{
+  position:relative;
+  left:1px;
+  top:-1px;
+}
+
+.container{
+  padding: 10px;
+  background-color: #424242;
+  display: flex;
+  width: 90%;
+  height: 90vh;
+  border-radius: 10px;
 }
