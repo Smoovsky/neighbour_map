@@ -31,6 +31,15 @@ function AppViewModel(){
     // console.log(g.target.value);
     let dataArray = self.data;
     dataArray = dataArray.filter(x => x.title.search(new RegExp(e.target.value, 'i')) !== -1);
+    self.data.forEach(
+      (x) => {
+        if(!dataArray.includes(x))
+          x.marker.setMap(null);
+        else {
+          x.marker.setMap(map);
+        }
+      }
+    );
     self.displayResult(dataArray);
   };
   self.removeEntry = function(item,e){
@@ -73,6 +82,8 @@ function AppViewModel(){
   };
   self.itemClick = function(item){
     window.map.setCenter(item.marker.getPosition());
+    item.marker.setAnimation(google.maps.Animation.BOUNCE);
+    setTimeout(function(){item.marker.setAnimation(null);}, 2000);
   };
 }
 
