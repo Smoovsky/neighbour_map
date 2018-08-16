@@ -55,7 +55,7 @@ function AppViewModel(){
   self.addEntry = function(vm, e){
     if($(e.target).is('i')){
       let entry = JSON.parse($(e.target).parent().data('data-location'));
-      //console.log(entry);
+      console.log(entry);
       self.data.push(entry);
       self.displayResult([...self.data]);
       let marker = new google.maps.Marker({
@@ -67,23 +67,30 @@ function AppViewModel(){
       });
       entry.marker = marker;
       let placeInfoWindow = new google.maps.InfoWindow();
-      marker.addListener('click', function(){
-        if (placeInfoWindow.marker == this) {
+
+      marker.openInfoWindow = function(){
+        if (placeInfoWindow.marker == marker) {
           console.log('This infowindow already is on this marker!');
         } else {
           populatePlaceDetailsOffline(marker, entry, placeInfoWindow);
         }
-      });
+      };
+
+      marker.addListener('click', marker.openInfoWindow);
       markers.push(marker);
-      let temp = self.data.map(({title, location, address}) => {return {title, location, address};});
+      let temp = self.data.map(({title, location, address, price4two, rating}) => {return {title, location, address, price4two, rating};});
+      //console.log();
       localStorage.setItem('neighbourMap', JSON.stringify(temp));
       showListings(true);
+      
     }
   };
   self.itemClick = function(item){
     window.map.setCenter(item.marker.getPosition());
     item.marker.setAnimation(google.maps.Animation.BOUNCE);
     setTimeout(function(){item.marker.setAnimation(null);}, 2000);
+    item.marker.openInfoWindow();
+    //console.log(item);
   };
 }
 

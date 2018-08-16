@@ -3,11 +3,11 @@ import throttle from 'lodash/throttle';
 import getZomatoApiInfo from './api.js';
 
 let data = JSON.parse(localStorage.getItem('neighbourMap'));
-if(data === null){
+if(data === null || data.length == 0){
   data = [
-    {title:'St. George Fish and Chips', location: {lat:-37.779298,lng:144.987183}, address:'addr1'},
-    {title:'Munsterhaus', location: {lat:-37.778893,lng:144.987367}, address:'addr1'},
-    {title:'Gler Thai Takeaway', location:{lat:-37.779313, lng:144.987378}, address:'addr1'},
+    {title:'St. George Fish and Chips', location: {lat:-37.779298,lng:144.987183}, address:'350 St Georges Rd, Fitzroy North VIC 3068', rating: 4.4, price4two: 20},
+    {title:'Munsterhaus', location: {lat:-37.778893,lng:144.987367}, address:'371 St Georges Rd, Fitzroy North VIC 3068', rating: 4.3, price4two:24},
+    {title:'Gler Thai Takeaway', location:{lat:-37.779313, lng:144.987378}, address:'354 St Georges Rd, Fitzroy North VIC 3068', rating: 4.6, price4two: 15},
   ];
   localStorage.setItem('neighbourMap', JSON.stringify(data));
 }
@@ -122,13 +122,17 @@ window.createMarkersForPlaces = function(places) {
     // so that only one is open at once.
     var placeInfoWindow = new google.maps.InfoWindow();
     // If a marker is clicked, do a place details search on it in the next function.
-    marker.addListener('click', function() {
-      if (placeInfoWindow.marker == this) {
+
+    marker.openInfoWindow = function() {
+      var self = marker;
+      if (placeInfoWindow.marker == self) {
         console.log('This infowindow already is on this marker!');
       } else {
         getPlacesDetails(this, placeInfoWindow);
       }
-    });
+    };
+
+    marker.addListener('click', marker.openInfoWindow);
     placeMarkers.push(marker);
     if (place.geometry.viewport) {
       // Only geocodes have viewport.
@@ -155,7 +159,7 @@ window.getPlacesDetails = function(marker, infowindow) {
     placeId: marker.id
   }, function(place, status) {
     if (status === google.maps.places.PlacesServiceStatus.OK) {
-      let placeInfo = JSON.stringify({
+      let placeInfo = {
         title:place.name,
         location:{
           lat:place.geometry.location.lat(),
@@ -163,13 +167,16 @@ window.getPlacesDetails = function(marker, infowindow) {
         },
         address:place.formatted_address,
         id:place.id,
-      });
-      console.log(place);
+      };
+      //console.log(place);
       getZomatoApiInfo(place.name, {lat:place.geometry.location.lat(),
         lon:place.geometry.location.lng()})
         .then(
           (res) =>{
-            console.log(res);
+            //console.log(res);
+            placeInfo.rating = res.user_rating.aggregate_rating;
+            placeInfo.price4two = res.average_cost_for_two;
+            placeInfo = JSON.stringify(placeInfo);
             infowindow.marker = marker;
             var innerHTML = `<div id="${marker.id}">`;
             if (place.name) {
@@ -208,6 +215,7 @@ window.getPlacesDetails = function(marker, infowindow) {
             infowindow.addListener('closeclick', function() {
               infowindow.marker = null;
             });
+            
             let target = $('<div>').data('data-location',placeInfo).attr({'data-bind':'event: {click: addEntry}'}).append($('<i class="fas fa-plus"></i>')).appendTo($(`#${marker.id}`))[0];
             //ko.applyBindings();
             ko.applyBindings(viewModel, target);
@@ -217,6 +225,9 @@ window.getPlacesDetails = function(marker, infowindow) {
         )
         .catch(()=>{
           //console.log(res);
+          placeInfo.rating = null;
+          placeInfo.price4two = null;
+          placeInfo = JSON.stringify(placeInfo);
           infowindow.marker = marker;
           var innerHTML = `<div id="${marker.id}">`;
           if (place.name) {
@@ -272,6 +283,20 @@ window.populatePlaceDetailsOffline = function(marker, place, infowindow){
   if (place.address) {
     innerHTML += '<br>' + place.address;
   }
+  if (place.rating) {
+    innerHTML += '<br>' + 'Rating:' + place.rating + '/5';
+  }
+  else {
+    innerHTML += '<br>' + 'Rating:' + 'N/A';
+  }
+
+  if (place.price4two) {
+    innerHTML += '<br>' + 'Price for two: $' + place.price4two;
+  }
+  else {
+    innerHTML += '<br>' + 'Price for two: N/A';
+  }
+
   innerHTML += '</div>';
   infowindow.setContent(innerHTML);
   infowindow.open(map, marker);
@@ -313,15 +338,19 @@ let initMap = () => {
       currentPlace.marker = marker;
       markers.push(marker);
       let placeInfoWindow = new google.maps.InfoWindow();
-      marker.addListener('click', function(){
-        if (placeInfoWindow.marker == this) {
+
+      marker.openInfoWindow = function(){
+        if (placeInfoWindow.marker == marker) {
           console.log('This infowindow already is on this marker!');
         } else {
           populatePlaceDetailsOffline(marker, currentPlace, placeInfoWindow);
           marker.setAnimation(google.maps.Animation.BOUNCE);
           setTimeout(function(){marker.setAnimation(null);}, 2000);
         }
-      });
+      }
+      
+
+      marker.addListener('click', marker.openInfoWindow);
     }
     showListings();
   };
